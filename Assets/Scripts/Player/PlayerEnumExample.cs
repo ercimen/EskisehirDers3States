@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class PlayerEnumExample : MonoBehaviour
 {
 
@@ -10,6 +11,11 @@ public class PlayerEnumExample : MonoBehaviour
     public float Speed = 3;
 
     public bool IsGameStarted;
+
+    public int Hp = 10;
+
+    private float _damageDelay = 0.2f;
+
 
     private void Awake()
     {
@@ -25,7 +31,7 @@ public class PlayerEnumExample : MonoBehaviour
             return;
         }
 
-        if (GameManager.Instance.CurrentState ==GameState.Play)
+        if (GameManager.Instance.CurrentState ==GameState.Play && !IsGameStarted)
         {
             CurrentPlayerState = PlayerState.Move;
             IsGameStarted = true;
@@ -38,19 +44,22 @@ public class PlayerEnumExample : MonoBehaviour
 
     private void StateCheck()
     {
+
         switch (CurrentPlayerState)
         {
             case PlayerState.Idle:
                 Idle();
                 break;
             case PlayerState.Move:
+                DeathCheck();
                 Move();
                 Jump();
                 break;
             case PlayerState.Jump:
                 
                 break;
-            case PlayerState.Ondamage:
+            case PlayerState.OnDamage:
+                DeathCheck();
                 TakeDamage();
                 Move();
                 break;
@@ -64,12 +73,12 @@ public class PlayerEnumExample : MonoBehaviour
 
     private void Idle()
     {
-        Debug.Log("bekliyorum");
     }
 
     private void Move()
     {
-        Debug.Log("hareket ediyorum");
+
+
         if (Input.GetKey(KeyCode.UpArrow))
         {
 
@@ -96,20 +105,45 @@ public class PlayerEnumExample : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Debug.Log("zipladim");
+
             gameObject.GetComponent<Rigidbody>().AddForce(Vector3.up * 10f, ForceMode.Impulse);
             CurrentPlayerState = PlayerState.Jump;
         }
     }
     private void TakeDamage()
     {
-        Debug.Log("Hasar aldým");
+
+        _damageDelay -= Time.deltaTime;
+
+        if (_damageDelay <= 0)
+        {
+            Hp -= 1;
+            Debug.Log(Hp);
+            _damageDelay = 0.2f;
+
+            if (Hp <= 0)
+            {
+                Death();
+            }
+        }
     }
     private void Death()
     {
-        Debug.Log("Ölüyüm ben ölüyüm.");
+
+        Hp = 0;
+        CurrentPlayerState = PlayerState.Dead;
+
+        GameManager.Instance.CurrentState = GameState.Finish;
     }
 
+
+    private void DeathCheck()
+    {
+        if (Hp<=0)
+        {
+            CurrentPlayerState = PlayerState.Dead;
+        }
+    }
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -125,7 +159,7 @@ public class PlayerEnumExample : MonoBehaviour
     {
         if (other.CompareTag("Lava"))
         {
-            CurrentPlayerState = PlayerState.Ondamage;
+            CurrentPlayerState = PlayerState.OnDamage;
         }
 
     }

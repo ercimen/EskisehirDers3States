@@ -15,13 +15,14 @@ public class Player : MonoBehaviour
     private bool _onDamage;
     private bool _isDead;
 
-    private float _damageDelay = 0.2f;
 
+
+    private float _damageDelay = 0.2f;
 
 
     private void Awake()
     {
-
+        // Bir unity metodu içinde bir þey yoksa orada boþ bir þekilde durmasýn. Silin gitsin....
     }
     private void Update()
     {
